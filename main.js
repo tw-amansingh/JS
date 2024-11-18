@@ -157,20 +157,11 @@ function galleryHandler() {
 
 //Product Section
 
-/* <div class="product-item">
-                <img src="./assets/products/img6.png" alt="AstroFiction">
-                <div class="product-details">
-                    <h3 class="product-title">AstroFiction</h3>
-                    <p class="product-author">John Doe</p>
-                    <p class="price-title">Price</p>
-                    <p class="product-price">$ 49.90</p>
-                </div>  
-    </div>*/
-function productsHandler() {
+function populateProducts(productLists) {
   let productSection = document.querySelector(".products-area");
+  productSection.textContent = "";
 
-  //Run a loop through the products and create an HTML element ("product-item") for each of them
-  products.forEach((product, index) => {
+  productLists.forEach((product) => {
     //Create the HTML for the individual product
     let productElm = document.createElement("div");
     productElm.classList.add("product-item");
@@ -179,7 +170,7 @@ function productsHandler() {
     let productImage = document.createElement("img");
     productImage.src = product.image;
     productImage.alt = "image for" + product.title;
-    
+
     //Appending img to productElm
     productElm.appendChild(productImage);
 
@@ -189,31 +180,72 @@ function productsHandler() {
 
     //Append innerdiv productElm
     productElm.appendChild(productDetail);
-    
 
     //Append productElm to
     productSection.appendChild(productElm);
 
     //Create h3 and 3p inside inner div
-    let h3 = document.createElement("h3");
-    h3.classList.add("product-title");
-    h3.innerHTML = product.title;
-    let p1 = document.createElement("p");
-    p1.classList.add("product-author");
-    p1.innerText = product.author;
-    let p2 = document.createElement("p");
-    p2.classList.add("price-title");
-    p2.innerText = "price";
-    let p3 = document.createElement("p");
-    p3.classList.add("product-price");
-    p3.innerHTML = "$  " + product.price;
+    let productTitle = document.createElement("h3");
+    productTitle.classList.add("product-title");
+    productTitle.innerHTML = product.title;
+    let productAuthor = document.createElement("p");
+    productAuthor.classList.add("product-author");
+    productAuthor.innerText = product.author;
+    let priceTitle = document.createElement("p");
+    priceTitle.classList.add("price-title");
+    priceTitle.innerText = "price";
+    let productPrice = document.createElement("p");
+    productPrice.classList.add("product-price");
+    //toFixed(2) forces the price to be in 2 decimal places
+    productPrice.innerHTML =
+      product.price > 0 ? "$  " + product.price.toFixed(2) : "Free";
 
     //Appending the h3 and 3p to innerDiv
-    productDetail.appendChild(h3);
-    productDetail.appendChild(p1);
-    productDetail.appendChild(p2);
-    productDetail.appendChild(p3);
+    productDetail.appendChild(productTitle);
+    productDetail.appendChild(productAuthor);
+    productDetail.appendChild(priceTitle);
+    productDetail.appendChild(productPrice);
   });
+}
+
+function productsHandler() {
+  let freeProduct = products.filter((item) => {
+    return !item.price || item.price <= 0;
+  });
+
+  let paidProduct = products.filter((item) => {
+    return item.price > 0;
+  });
+
+  populateProducts(products);
+
+  //Run a loop through the products and create an HTML element ("product-item") for each of them
+
+  document.querySelector(
+    ".products-filter label[for=all] span.product-amount"
+  ).textContent = products.length;
+  document.querySelector(
+    ".products-filter label[for=paid] span.product-amount"
+  ).textContent = paidProduct.length;
+  document.querySelector(
+    ".products-filter label[for=free] span.product-amount"
+  ).textContent = freeProduct.length;
+
+  //Creating separate tag for paid and free
+  let productsFilter = document.querySelector(".products-filter");
+  productsFilter.addEventListener("click", function (e) {
+    if (e.target.id === "all") {
+      populateProducts(products);
+    } else if (e.target.id === "paid") {
+      populateProducts(paidProduct);
+    } else if (e.target.id === "free") {
+      populateProducts(freeProduct);
+    }
+  });
+}
+
+function footerHandler(){
+  document.querySelector("footer").textContent= `© ${new Date().getFullYear()} - All rights reserved`
 }
 
 // page load
@@ -222,6 +254,7 @@ greetingHandler();
 clockHandler();
 galleryHandler();
 productsHandler();
+footerHandler();
 
 // //Traditional for loop
 // for(let i=0;i<10;i++){
@@ -270,3 +303,12 @@ productsHandler();
 // let num=10;
 // num =num.toString();
 // console.log(typeof num);
+
+//Filter example for array
+// let number = [1, 2, 3, 4, 5, 6, 7, 8];
+
+// let greaterThan4 = number.filter((item) => {
+//   return item > 4;
+// });
+
+// console.log(greaterThan4);
