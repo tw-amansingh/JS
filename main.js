@@ -1,3 +1,6 @@
+const weatherAPIkey = "d0e6ca8ff41a44b88eeedaef7408592b";
+const weatherAPIURL = `https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}&units=metric`;
+
 const galleryImages = [
   {
     src: "./assets/gallery/image1.jpg",
@@ -78,27 +81,52 @@ function greetingHandler() {
   else if (currentHour < 17) greetingText = "Good AfterNoon!";
   else if (currentHour < 24) greetingText = "Good Evening!";
   else greetingText = "Welcome!";
-  const weatherCondition = "sunny";
-  const userLocation = "New York";
-  let temperature = 22.845;
-
-  let celsiusText = `The weather is ${weatherCondition} in ${userLocation} and its ${temperature.toFixed(
-    1
-  )}°C ouside`;
-  let fahrText = `The weather is ${weatherCondition} in ${userLocation} and its ${celToFahr(
-    temperature.toFixed(1)
-  )}°F ouside`;
 
   document.querySelector("#greeting").innerHTML = greetingText;
-  document.querySelector("p#weather").innerHTML = celsiusText;
+}
 
-  //Changing the temperature based on the click of radio button
-  document.querySelector(".weather-group").addEventListener("click", (e) => {
-    if (e.target.id === "fahr") {
-      document.querySelector("p#weather").innerHTML = fahrText;
-    } else {
-      document.querySelector("p#weather").innerHTML = celsiusText;
-    }
+//Getting user location
+function weatherHandler() {
+  navigator.geolocation.getCurrentPosition((position) => {
+    let latitude = position.coords.latitude;
+    let longitude = position.coords.longitude;
+    let url = weatherAPIURL
+      .replace("{lon}", longitude)
+      .replace("{lat}", latitude)
+      .replace("{API key}", weatherAPIkey);
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const condition = data.weather[0].description;
+        const location = data.name;
+        const temperature = data.main.temp;
+
+        let celsiusText = `The weather is ${condition} in ${location} and its ${temperature.toFixed(
+          1
+        )}°C ouside`;
+        let fahrText = `The weather is ${condition} in ${location} and its ${celToFahr(
+          temperature.toFixed(1)
+        )}°F ouside`;
+
+        document.querySelector("p#weather").innerHTML = celsiusText;
+
+        //Changing the temperature based on the click of radio button
+        document
+          .querySelector(".weather-group")
+          .addEventListener("click", (e) => {
+            if (e.target.id === "fahr") {
+              document.querySelector("p#weather").innerHTML = fahrText;
+            } else {
+              document.querySelector("p#weather").innerHTML = celsiusText;
+            }
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+        document.querySelector("p#weather").innerHTML =
+          "Unable to fetch your location please refresh the page";
+      });
   });
 }
 
@@ -208,14 +236,11 @@ function populateProducts(productLists) {
   });
 }
 
+//For segragating product based on price
 function productsHandler() {
-  let freeProduct = products.filter((item) => {
-    return !item.price || item.price <= 0;
-  });
+  let freeProduct = products.filter((item) => !item.price || item.price <= 0);
 
-  let paidProduct = products.filter((item) => {
-    return item.price > 0;
-  });
+  let paidProduct = products.filter((item) => item.price > 0);
 
   populateProducts(products);
 
@@ -244,13 +269,17 @@ function productsHandler() {
   });
 }
 
-function footerHandler(){
-  document.querySelector("footer").textContent= `© ${new Date().getFullYear()} - All rights reserved`
+//Creating footer
+function footerHandler() {
+  document.querySelector(
+    "footer"
+  ).textContent = `© ${new Date().getFullYear()} - All rights reserved`;
 }
 
 // page load
 menuHandler();
 greetingHandler();
+weatherHandler();
 clockHandler();
 galleryHandler();
 productsHandler();
